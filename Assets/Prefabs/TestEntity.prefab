@@ -15,7 +15,9 @@ GameObject:
   - component: {fileID: 6213344875873267570}
   - component: {fileID: 1487469152803862605}
   - component: {fileID: 1380252359113478415}
-  m_Layer: 0
+  - component: {fileID: 8403129236067301035}
+  - component: {fileID: 3588464503788766763}
+  m_Layer: 6
   m_Name: TestEntity
   m_TagString: Entity
   m_Icon: {fileID: 0}
@@ -200,6 +202,37 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &8403129236067301035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6716496315837506147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1442f30aebde814fb7329a3eb868349, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  capacity: 20
+  maxWeight: 50
+  slots: []
+--- !u!114 &3588464503788766763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6716496315837506147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4907632e4b6aa724e9168046274b912b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Soldier
+  soldierName: Ranger
+  walkSpeed: 3.5
+  runSpeed: 6
+  selectionRing: {fileID: 0}
 --- !u!1001 &7263238365447614022
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -251,6 +284,10 @@ PrefabInstance:
     - target: {fileID: 5078574246981982561, guid: 5259585ba34fb8944b1151d854fb05b0, type: 3}
       propertyPath: m_Name
       value: MovementOnGrid
+      objectReference: {fileID: 0}
+    - target: {fileID: 5078574246981982561, guid: 5259585ba34fb8944b1151d854fb05b0, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5290953641889031120, guid: 5259585ba34fb8944b1151d854fb05b0, type: 3}
       propertyPath: entityGameObject

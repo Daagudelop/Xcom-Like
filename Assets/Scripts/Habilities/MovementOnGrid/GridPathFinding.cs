@@ -11,12 +11,13 @@ public class GridPathFinding : MonoBehaviour,IAbility
     [SerializeField] float cellSize;
     [SerializeField] GameObject entityGameObject;
     Entity entity;
-
-
+    private bool hasArrived;
 
 
     [HideInInspector]
     public SerializedDictionary<Vector3, float> allGridPoints;
+
+    public bool HasArrived { get => hasArrived; set => hasArrived = value; }
 
     private void Awake()
     {
@@ -52,6 +53,7 @@ public class GridPathFinding : MonoBehaviour,IAbility
         CalculateMovementRegion();
         GridPointer.instance.currentEntityCore = entity;
         GridPointer.instance.allGridPoints = allGridPoints;
+        GridPointer.instance.OnGridPointConfirmed += HandleGridConfirmed;
     }
 
     public void SelectableAI()
@@ -63,6 +65,7 @@ public class GridPathFinding : MonoBehaviour,IAbility
         allGridPoints.Clear();
         GridPointer.instance.currentEntityCore = null;
         GridPointer.instance.allGridPoints = null;
+        GridPointer.instance.OnGridPointConfirmed -= HandleGridConfirmed;
     }
 
     public void UnSelectableAI()
@@ -70,6 +73,42 @@ public class GridPathFinding : MonoBehaviour,IAbility
         throw new System.NotImplementedException();
     }
 
+    public void HandleGridConfirmed(Vector3 pos)
+    {
+        NavMeshAgent navMeshAgentEntity = entity.GetComponent<NavMeshAgent>();
+        navMeshAgentEntity.SetDestination(pos);
+        entity.Stats[StatName.MovementPoints].current -= allGridPoints[pos];
+        Debug.Log(entity.Stats[StatName.MovementPoints].current + "  " + allGridPoints[pos]);
+        allGridPoints.Clear();
+        TurnManager.instance.ScheduleRepeatingOnTurnEnd(1, () => entity.Stats[StatName.MovementPoints].current = entity.Stats[StatName.MovementPoints].max);
+        CheckIfArrived(navMeshAgentEntity);
+    }
+
+    private void CheckIfArrived(NavMeshAgent agent)
+    {
+        // Si todavía está calculando el camino, no hacemos nada
+        if (agent.pathPending) return;
+
+        if (agent.remainingDistance <= agent.stoppingDistance)
+        {
+            // Evita que se dispare en cada frame mientras está detenido
+            if (!HasArrived && (!agent.hasPath || agent.velocity.sqrMagnitude == 0f))
+            {
+                HasArrived = true;
+                OnReachedDestination();
+            }
+        }
+        else
+        {
+            HasArrived = false;
+        }
+    }
+
+    private void OnReachedDestination()
+    {
+        Debug.Log("Llegó al destino");
+        CalculateMovementRegion();
+    }
 
     #region Create Movement Region
 
@@ -79,7 +118,7 @@ public class GridPathFinding : MonoBehaviour,IAbility
         Queue<(Vector3 pos, float depth)> queue = new Queue<(Vector3 pos, float depth)>();
         HashSet<Vector3> visited = new HashSet<Vector3>();
 
-        Vector3 roundedStart = RoundToGrid(start.transform.position);
+        Vector3 roundedStart = RoundToGrid(start.transform.position, cellSize);
         queue.Enqueue((roundedStart, 0));
         visited.Add(roundedStart); // marcamos como visitado, pero NO lo agregamos a gridPoints
 
@@ -112,7 +151,7 @@ public class GridPathFinding : MonoBehaviour,IAbility
 
                 if (!NavMesh.Raycast(current, target, out hit, NavMesh.AllAreas))
                 {
-                    Vector3 roundedHit = RoundToGrid(hit.position);
+                    Vector3 roundedHit = RoundToGrid(hit.position, cellSize);
 
                     if (!visited.Contains(roundedHit))
                     {
@@ -136,12 +175,12 @@ public class GridPathFinding : MonoBehaviour,IAbility
     }
 
 
-    public static Vector3 RoundToGrid(Vector3 pos)
+    public static Vector3 RoundToGrid(Vector3 pos, float cellSize)
     {
         return new Vector3(
-            Mathf.Round(pos.x / 2f) * 2f,
-            Mathf.Round(pos.y / 2f) * 2f,
-            Mathf.Round(pos.z / 2f) * 2f
+            Mathf.Round(pos.x / cellSize) * cellSize,
+            Mathf.Round(pos.y / cellSize) * cellSize,
+            Mathf.Round(pos.z / cellSize) * cellSize
         );
     }
 

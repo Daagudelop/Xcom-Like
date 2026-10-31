@@ -89,7 +89,7 @@ public enum ActionName
 [Serializable]
 public class StatData
 {
-    public int min, current, max;
+    public float min, current, max;
     public List<string> minEquation, currentEquation, maxEquation;
 }
 
